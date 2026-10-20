@@ -30,8 +30,9 @@ The E2E tests need a browser once: `npx playwright install chromium`.
 
 If you use [`just`](https://github.com/casey/just), the `justfile` adds a few shortcuts:
 `just clean` removes build output, test reports and tool caches, `just clean-all` also removes
-`node_modules`, and `just check` runs the same checks as CI (lint, formatting, types, unit
-tests). `just` is optional.
+`node_modules`, `just check` runs the same checks as CI (lint, formatting, types, unit tests),
+and `just zip` packs the committed project, including its Git history, into
+`../file-tree-explorer.zip`. `just` is optional.
 
 ## Features
 
