@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_ERRORS, parseJson, validateTree } from "./validate";
+import { MAX_ERRORS, parseJson, parseTree, validateTree } from "./validate";
 import type { Result, TreeNode } from "./types";
 
 const example = {
@@ -61,6 +61,17 @@ describe("validateTree", () => {
     expect(validateTree(folder([])).ok).toBe(true);
   });
 
+  it("treats a folder without children as empty", () => {
+    expect(validateTree({ name: "root", type: "folder" })).toEqual({
+      ok: true,
+      value: { name: "root", type: "folder", children: [] },
+    });
+    expect(validateTree(folder([{ name: "a", type: "folder" }]))).toEqual({
+      ok: true,
+      value: folder([{ name: "a", type: "folder", children: [] }]),
+    });
+  });
+
   it("strips unknown fields", () => {
     const result = validateTree({
       ...folder([{ name: "a", type: "file", size: 1, extra: true }]),
@@ -89,7 +100,8 @@ describe("validateTree", () => {
     ["negative size", folder([{ name: "a", type: "file", size: -1 }]), "children[0].size"],
     ["fractional size", folder([{ name: "a", type: "file", size: 1.5 }]), "children[0].size"],
     ["NaN size", folder([{ name: "a", type: "file", size: Number.NaN }]), "children[0].size"],
-    ["missing children", folder([{ name: "a", type: "folder" }]), "children[0].children"],
+    ["non-array children", folder([{ name: "a", type: "folder", children: {} }]), "children[0].children"],
+    ["null children", folder([{ name: "a", type: "folder", children: null }]), "children[0].children"],
   ])("rejects %s", (_label, input, expectedPath) => {
     expect(errorPaths(validateTree(input))).toEqual([expectedPath]);
   });
@@ -137,5 +149,23 @@ describe("validateTree", () => {
       node = { name: `d${depth}`, type: "folder", children: [node] };
     }
     expect(validateTree(node).ok).toBe(true);
+  });
+});
+
+describe("parseTree", () => {
+  it("parses and validates in one step", () => {
+    expect(parseTree(JSON.stringify(example))).toEqual({ ok: true, value: example });
+  });
+
+  it("returns the JSON syntax error", () => {
+    const result = parseTree("{");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors[0]?.message).toMatch(/^Invalid JSON/);
+  });
+
+  it("returns validation errors", () => {
+    expect(errorPaths(parseTree('{"name":"root","type":"folder","children":1}'))).toEqual([
+      "children",
+    ]);
   });
 });

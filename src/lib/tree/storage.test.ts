@@ -70,9 +70,21 @@ describe("saveTree / loadTree", () => {
     expect(() => clearStoredTree(throwingStorage)).not.toThrow();
   });
 
+  it("drops the previously saved tree when saving fails", () => {
+    const { storage, data } = memoryStorage({ [STORAGE_KEY]: JSON.stringify(tree) });
+    const fullStorage: KeyValueStorage = {
+      ...storage,
+      setItem: () => {
+        throw new Error("QuotaExceededError");
+      },
+    };
+    expect(saveTree(fullStorage, tree)).toBe(false);
+    expect(data.has(STORAGE_KEY)).toBe(false);
+  });
+
   it.each([
     ["invalid JSON", "{"],
-    ["an invalid tree", JSON.stringify({ name: "root", type: "folder" })],
+    ["an invalid tree", JSON.stringify({ name: "root", type: "file" })],
   ])("drops %s from storage", (_label, stored) => {
     const { storage, data } = memoryStorage({ [STORAGE_KEY]: stored });
     expect(loadTree(storage)).toBeNull();

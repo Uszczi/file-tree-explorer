@@ -3,8 +3,8 @@ import type { TreeIndex, TreeNode } from "../lib/tree/types";
 
 export interface TreeContextValue {
   readonly index: TreeIndex | null;
-  /** Replaces the current tree. Returns false if it could not be persisted. */
-  readonly load: (tree: TreeNode) => boolean;
+  readonly persisted: boolean;
+  readonly load: (tree: TreeNode) => void;
   readonly clear: () => void;
 }
 
@@ -16,4 +16,12 @@ export function useTree(): TreeContextValue {
     throw new Error("useTree must be used within a TreeProvider");
   }
   return value;
+}
+
+export function useTreeIndex(): TreeIndex {
+  const { index } = useTree();
+  if (index === null) {
+    throw new Error("useTreeIndex must be used under TreeLayout");
+  }
+  return index;
 }

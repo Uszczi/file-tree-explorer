@@ -105,7 +105,8 @@ export function validateTree(input: unknown): Result<TreeNode> {
     }
 
     if (type === "folder") {
-      const { children } = current;
+      // A folder without "children" is treated as empty; any other non-array is an error.
+      const children = current.children === undefined ? [] : current.children;
       if (!Array.isArray(children)) {
         errors.push({
           path: fieldPath(errorPath, "children"),
@@ -141,4 +142,9 @@ export function validateTree(input: unknown): Result<TreeNode> {
     return { ok: false, errors: errors.slice(0, MAX_ERRORS) };
   }
   return { ok: true, value: root };
+}
+
+export function parseTree(text: string): Result<TreeNode> {
+  const parsed = parseJson(text);
+  return parsed.ok ? validateTree(parsed.value) : parsed;
 }

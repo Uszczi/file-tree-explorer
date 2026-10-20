@@ -14,21 +14,26 @@ export function TreeProvider({ children }: TreeProviderProps) {
     const stored = loadTree(storage);
     return stored === null ? null : buildIndex(stored);
   });
+  const [persisted, setPersisted] = useState(true);
 
   const load = useCallback(
     (tree: TreeNode) => {
       setIndex(buildIndex(tree));
-      return saveTree(storage, tree);
+      setPersisted(saveTree(storage, tree));
     },
     [storage],
   );
 
   const clear = useCallback(() => {
     setIndex(null);
+    setPersisted(true);
     clearStoredTree(storage);
   }, [storage]);
 
-  const value = useMemo<TreeContextValue>(() => ({ index, load, clear }), [index, load, clear]);
+  const value = useMemo<TreeContextValue>(
+    () => ({ index, persisted, load, clear }),
+    [index, persisted, load, clear],
+  );
 
   return <TreeContext value={value}>{children}</TreeContext>;
 }

@@ -1,5 +1,5 @@
 import type { TreeNode } from "./types";
-import { parseJson, validateTree } from "./validate";
+import { parseTree } from "./validate";
 
 export const STORAGE_KEY = "file-tree-explorer:tree:v1";
 
@@ -25,6 +25,8 @@ export function saveTree(
     storage.setItem(STORAGE_KEY, JSON.stringify(tree));
     return true;
   } catch {
+    // Otherwise a reload would bring back the previously saved tree.
+    clearStoredTree(storage);
     return false;
   }
 }
@@ -46,11 +48,10 @@ export function loadTree(storage: KeyValueStorage | null): TreeNode | null {
   }
   if (text === null) return null;
 
-  const parsed = parseJson(text);
-  const validated = parsed.ok ? validateTree(parsed.value) : null;
-  if (validated === null || !validated.ok) {
+  const result = parseTree(text);
+  if (!result.ok) {
     clearStoredTree(storage);
     return null;
   }
-  return validated.value;
+  return result.value;
 }

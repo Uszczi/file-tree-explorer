@@ -13,3 +13,5 @@ export function toNodeUrl(path: NodePath): string {
     ? TREE_URL
     : `${TREE_URL}/${encodeURIComponent(path)}`;
 }
+
+export const SEARCH_PARAM = "q";
