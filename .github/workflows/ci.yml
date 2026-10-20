@@ -12,16 +12,21 @@ concurrency:
 
 jobs:
   checks:
-    name: Lint, types and unit tests
+    name: Lint, types and unit tests (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # 18 is the minimum the assignment requires; 24 is the current LTS.
+        node: [18, 24]
 
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
           cache: npm
 
       - name: Install dependencies

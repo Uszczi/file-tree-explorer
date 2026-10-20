@@ -101,7 +101,7 @@ describe("searchNodes", () => {
   describe("extended syntax", () => {
     it("requires every space-separated term to match", () => {
       // Order is by score: b|ig T|able N|ode hits word starts, so it outranks Button.
-      expect(names("btn tsx").toSorted()).toEqual([
+      expect([...names("btn tsx")].sort()).toEqual([
         "Button.tsx",
         "IconButton.tsx",
         "bigTableNode.tsx",
