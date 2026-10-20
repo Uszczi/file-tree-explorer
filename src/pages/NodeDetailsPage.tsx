@@ -13,7 +13,11 @@ import { useTreeIndex } from "../state/treeContext";
 const bytesFormat = new Intl.NumberFormat("en-US");
 
 function Size({ bytes }: { readonly bytes: number }) {
-  return <span title={`${bytesFormat.format(bytes)} bytes`}>{formatSize(bytes)}</span>;
+  return (
+    <span title={`${bytesFormat.format(bytes)} bytes`}>
+      {formatSize(bytes)}
+    </span>
+  );
 }
 
 function plural(count: number, word: string): string {
@@ -41,7 +45,8 @@ function ParentLink({ index, entry }: DetailsProps) {
   );
 }
 
-const dlClass = "grid grid-cols-[max-content_minmax(0,1fr)] gap-x-6 gap-y-2 text-sm";
+const dlClass =
+  "grid grid-cols-[max-content_minmax(0,1fr)] gap-x-6 gap-y-2 text-sm";
 
 function FileDetails({ index, entry }: DetailsProps) {
   return (
@@ -102,7 +107,9 @@ function FolderDetails({ index, entry }: DetailsProps) {
       ) : (
         <div className="overflow-x-auto rounded-md border border-zinc-200 dark:border-zinc-800">
           <table className="w-full text-sm">
-            <thead className={`bg-zinc-50 text-left text-xs tracking-wide uppercase dark:bg-zinc-800/50 ${ui.muted}`}>
+            <thead
+              className={`bg-zinc-50 text-left text-xs tracking-wide uppercase dark:bg-zinc-800/50 ${ui.muted}`}
+            >
               <tr>
                 <th scope="col" className="px-3 py-2 font-medium">
                   Name
@@ -117,13 +124,21 @@ function FolderDetails({ index, entry }: DetailsProps) {
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
               {children.map((child) => (
-                <tr key={child.path} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                <tr
+                  key={child.path}
+                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                >
                   <td className="px-3 py-2">
-                    <NodeLink path={child.path} className={`${ui.link} break-all`}>
+                    <NodeLink
+                      path={child.path}
+                      className={`${ui.link} break-all`}
+                    >
                       <NodeIcon node={child.node} /> {child.node.name}
                     </NodeLink>
                   </td>
-                  <td className={`px-3 py-2 ${ui.muted}`}>{nodeTypeLabel(child.node)}</td>
+                  <td className={`px-3 py-2 ${ui.muted}`}>
+                    {nodeTypeLabel(child.node)}
+                  </td>
                   <td className="px-3 py-2 text-right whitespace-nowrap tabular-nums">
                     <Size bytes={child.totalSize} />
                   </td>
@@ -137,8 +152,6 @@ function FolderDetails({ index, entry }: DetailsProps) {
   );
 }
 
-// The router already decodes the param once, so it must not be decoded again:
-// decodeURIComponent("100%.txt") would throw.
 export function NodeDetailsPage() {
   const { nodePath = ROOT_PATH } = useParams();
   const index = useTreeIndex();
@@ -179,7 +192,11 @@ export function NodeDetailsPage() {
           {nodeTypeLabel(entry.node)}
         </span>
       </h2>
-      {folder ? <FolderDetails index={index} entry={entry} /> : <FileDetails index={index} entry={entry} />}
+      {folder ? (
+        <FolderDetails index={index} entry={entry} />
+      ) : (
+        <FileDetails index={index} entry={entry} />
+      )}
     </section>
   );
 }
