@@ -16,13 +16,42 @@ export function getBrowserStorage(): KeyValueStorage | null {
   }
 }
 
+export function serializeTree(tree: TreeNode): string {
+  const parts: string[] = [];
+  const stack: (TreeNode | string)[] = [tree];
+
+  while (stack.length > 0) {
+    const item = stack.pop()!;
+    if (typeof item === "string") {
+      parts.push(item);
+      continue;
+    }
+
+    const name = JSON.stringify(item.name);
+    if (item.type === "file") {
+      parts.push(`{"name":${name},"type":"file","size":${item.size}}`);
+      continue;
+    }
+
+    parts.push(`{"name":${name},"type":"folder","children":[`);
+    stack.push("]}");
+    // Pushed in reverse so children are emitted in order.
+    for (let index = item.children.length - 1; index >= 0; index--) {
+      stack.push(item.children[index]);
+      if (index > 0) stack.push(",");
+    }
+  }
+
+  return parts.join("");
+}
+
 export function saveTree(
   storage: KeyValueStorage | null,
   tree: TreeNode,
 ): boolean {
   if (storage === null) return false;
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(tree));
+    storage.setItem(STORAGE_KEY, serializeTree(tree));
     return true;
   } catch {
     // Otherwise a reload would bring back the previously saved tree.

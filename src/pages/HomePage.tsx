@@ -10,6 +10,7 @@ import { ExamplesList } from "../components/ExamplesList";
 import { ui } from "../components/ui";
 import { ValidationErrors } from "../components/ValidationErrors";
 import { TREE_URL } from "../lib/tree/paths";
+import { stringifyForEditor } from "../lib/tree/serialize";
 import type { ValidationError } from "../lib/tree/types";
 import { parseTree } from "../lib/tree/validate";
 import { useTree } from "../state/treeContext";
@@ -18,7 +19,7 @@ export function HomePage() {
   const { index, load } = useTree();
   const navigate = useNavigate();
   const [text, setText] = useState(() =>
-    index === null ? "" : JSON.stringify(index.root, null, 2),
+    index === null ? "" : stringifyForEditor(index.root),
   );
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const textareaId = useId();

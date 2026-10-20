@@ -4,6 +4,7 @@ import {
   getBrowserStorage,
   loadTree,
   saveTree,
+  serializeTree,
   STORAGE_KEY,
   type KeyValueStorage,
 } from "./storage";
@@ -99,6 +100,29 @@ describe("saveTree / loadTree", () => {
     const { storage } = memoryStorage();
     expect(saveTree(storage, node)).toBe(true);
     expect(loadTree(storage)?.type).toBe("folder");
+  });
+});
+
+describe("serializeTree", () => {
+  it("matches JSON.stringify", () => {
+    const nested: TreeNode = {
+      name: 'quote " and \\ slash',
+      type: "folder",
+      children: [
+        tree,
+        { name: "empty", type: "folder", children: [] },
+        { name: "ż.bin", type: "file", size: 0 },
+      ],
+    };
+    expect(serializeTree(nested)).toBe(JSON.stringify(nested));
+  });
+
+  it("does not overflow the stack on a very deep tree", () => {
+    let node: TreeNode = { name: "leaf", type: "file", size: 1 };
+    for (let level = 0; level < 100_000; level++) {
+      node = { name: "d", type: "folder", children: [node] };
+    }
+    expect(() => serializeTree(node)).not.toThrow();
   });
 });
 
