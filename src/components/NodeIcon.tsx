@@ -9,5 +9,9 @@ interface NodeIconProps {
 
 // Decorative: the node name next to it carries the meaning for screen readers.
 export function NodeIcon({ node, expanded = false }: NodeIconProps) {
-  return <span aria-hidden="true">{isFolder(node) ? (expanded ? "📂" : "📁") : "📄"}</span>;
+  return (
+    <span aria-hidden="true">
+      {isFolder(node) ? (expanded ? "📂" : "📁") : "📄"}
+    </span>
+  );
 }

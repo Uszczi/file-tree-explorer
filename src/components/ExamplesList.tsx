@@ -18,15 +18,24 @@ const GROUPS: readonly ExampleGroup[] = [
 
 export function ExamplesList({ onSelect }: ExamplesListProps) {
   return (
-    <section aria-labelledby="examples-heading" className={`${ui.card} self-start p-4`}>
+    <section
+      aria-labelledby="examples-heading"
+      className={`${ui.card} self-start p-4`}
+    >
       <h2 id="examples-heading" className="text-sm font-semibold">
         Examples
       </h2>
-      <p className={`mt-1 text-xs ${ui.muted}`}>Click to insert one into the editor, then load it.</p>
+      <p className={`mt-1 text-xs ${ui.muted}`}>
+        Click to insert one into the editor, then load it.
+      </p>
 
       {GROUPS.map((group) => (
         <div key={group.title} className="mt-4">
-          <h3 className={`mb-1 text-xs font-medium tracking-wide uppercase ${ui.muted}`}>{group.title}</h3>
+          <h3
+            className={`mb-1 text-xs font-medium tracking-wide uppercase ${ui.muted}`}
+          >
+            {group.title}
+          </h3>
           <ul className="flex flex-col gap-0.5">
             {group.examples.map((example) => (
               <li key={example.id}>

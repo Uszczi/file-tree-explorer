@@ -92,7 +92,11 @@ const SPECIAL_NAMES_TREE: TreeNode = {
     },
     { name: ".gitignore", type: "file", size: 210 },
     { name: "a&b=c.json", type: "file", size: 33 },
-    { name: "日本語", type: "folder", children: [{ name: "ファイル.txt", type: "file", size: 512 }] },
+    {
+      name: "日本語",
+      type: "folder",
+      children: [{ name: "ファイル.txt", type: "file", size: 512 }],
+    },
     { name: "very-long-name-".repeat(8) + "end.ts", type: "file", size: 4_096 },
   ],
 };
@@ -127,9 +131,21 @@ function json(value: unknown): string {
 }
 
 export const VALID_EXAMPLES: readonly Example[] = [
-  { id: "assignment", label: "Assignment example", text: () => json(ASSIGNMENT_TREE) },
-  { id: "web-app", label: "Web app (B to GB sizes)", text: () => json(WEB_APP_TREE) },
-  { id: "special-names", label: "Special characters in names", text: () => json(SPECIAL_NAMES_TREE) },
+  {
+    id: "assignment",
+    label: "Assignment example",
+    text: () => json(ASSIGNMENT_TREE),
+  },
+  {
+    id: "web-app",
+    label: "Web app (B to GB sizes)",
+    text: () => json(WEB_APP_TREE),
+  },
+  {
+    id: "special-names",
+    label: "Special characters in names",
+    text: () => json(SPECIAL_NAMES_TREE),
+  },
   {
     id: "missing-children",
     label: "Folders without children",
@@ -148,8 +164,16 @@ export const VALID_EXAMPLES: readonly Example[] = [
     label: "Single file as root",
     text: () => json({ name: "notes.txt", type: "file", size: 777 }),
   },
-  { id: "deep", label: "Deep nesting (200 levels)", text: () => json(deepTree(200)) },
-  { id: "large", label: "Large (100 folders × 100 files)", text: () => json(wideTree(100, 100)) },
+  {
+    id: "deep",
+    label: "Deep nesting (200 levels)",
+    text: () => json(deepTree(200)),
+  },
+  {
+    id: "large",
+    label: "Large (100 folders × 100 files)",
+    text: () => json(wideTree(100, 100)),
+  },
 ];
 
 export const INVALID_EXAMPLES: readonly Example[] = [

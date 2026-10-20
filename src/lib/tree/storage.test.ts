@@ -72,7 +72,9 @@ describe("saveTree / loadTree", () => {
   });
 
   it("drops the previously saved tree when saving fails", () => {
-    const { storage, data } = memoryStorage({ [STORAGE_KEY]: JSON.stringify(tree) });
+    const { storage, data } = memoryStorage({
+      [STORAGE_KEY]: JSON.stringify(tree),
+    });
     const fullStorage: KeyValueStorage = {
       ...storage,
       setItem: () => {

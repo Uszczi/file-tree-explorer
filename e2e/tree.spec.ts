@@ -14,7 +14,9 @@ test.describe("tree view and details", () => {
 
     await expect(page).toHaveURL("/tree/src%2Fcomponents%2FButton.tsx");
     const main = page.getByRole("main");
-    await expect(main.getByRole("heading", { level: 2 })).toContainText("Button.tsx");
+    await expect(main.getByRole("heading", { level: 2 })).toContainText(
+      "Button.tsx",
+    );
     await expect(main).toContainText("512 B");
     await expect(main).toContainText("root/src/components/Button.tsx");
     await expect(page).toHaveTitle("Button.tsx · FileTree Explorer");
@@ -36,26 +38,40 @@ test.describe("tree view and details", () => {
     await expect(main).toContainText("2 (1 folder, 1 file)");
     await expect(main).toContainText("1.5 KB");
 
-    await main.getByRole("table").getByRole("link", { name: "components" }).click();
+    await main
+      .getByRole("table")
+      .getByRole("link", { name: "components" })
+      .click();
     await expect(page).toHaveURL("/tree/src%2Fcomponents");
   });
 
   test("navigates up with breadcrumbs", async ({ page }) => {
     await page.goto("/tree/src%2Fcomponents%2FButton.tsx");
-    await page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "src" }).click();
+    await page
+      .getByRole("navigation", { name: "Breadcrumb" })
+      .getByRole("link", { name: "src" })
+      .click();
 
     await expect(page).toHaveURL("/tree/src");
   });
 
-  test("restores the tree after a reload on a deep link and reveals the node", async ({ page }) => {
+  test("restores the tree after a reload on a deep link and reveals the node", async ({
+    page,
+  }) => {
     await page.goto("/tree/src%2Fcomponents%2FButton.tsx");
     await page.reload();
 
-    await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toContainText("Button.tsx");
-    await expect(fileTree(page).getByRole("treeitem", { selected: true })).toContainText("Button.tsx");
+    await expect(
+      page.getByRole("main").getByRole("heading", { level: 2 }),
+    ).toContainText("Button.tsx");
+    await expect(
+      fileTree(page).getByRole("treeitem", { selected: true }),
+    ).toContainText("Button.tsx");
   });
 
-  test("closing the tree returns home and guards the tree route", async ({ page }) => {
+  test("closing the tree returns home and guards the tree route", async ({
+    page,
+  }) => {
     await page.getByRole("button", { name: "Close tree" }).click();
     await expect(page).toHaveURL("/");
 
@@ -65,24 +81,31 @@ test.describe("tree view and details", () => {
 
   test("shows a message for an unknown node", async ({ page }) => {
     await page.goto("/tree/does-not-exist");
-    await expect(page.getByRole("heading", { name: "Node not found" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Node not found" }),
+    ).toBeVisible();
   });
 
   test("shows a not found page for unknown routes", async ({ page }) => {
     await page.goto("/nope");
-    await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Page not found" }),
+    ).toBeVisible();
   });
 
   test("supports keyboard navigation", async ({ page }) => {
     const tree = fileTree(page);
-    const link = (name: string) => tree.getByRole("link", { name, exact: true });
+    const link = (name: string) =>
+      tree.getByRole("link", { name, exact: true });
 
     await link("root").focus();
     await page.keyboard.press("ArrowDown");
     await expect(link("src")).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
-    await expect(tree.getByRole("button", { name: "Collapse src" })).toBeVisible();
+    await expect(
+      tree.getByRole("button", { name: "Collapse src" }),
+    ).toBeVisible();
 
     await page.keyboard.press("ArrowRight");
     await expect(link("index.ts")).toBeFocused();
@@ -109,5 +132,7 @@ test("handles special characters in node URLs", async ({ page }) => {
 
   await expect(page).toHaveURL("/tree/my%20documents%2F100%25%20done.md");
   await page.reload();
-  await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toContainText("100% done.md");
+  await expect(
+    page.getByRole("main").getByRole("heading", { level: 2 }),
+  ).toContainText("100% done.md");
 });

@@ -23,7 +23,9 @@ export function folderPaths(index: TreeIndex): NodePath[] {
 export function childEntries(index: TreeIndex, path: NodePath): IndexedNode[] {
   const node = index.byPath.get(path)?.node;
   if (node === undefined || !isFolder(node)) return [];
-  return node.children.flatMap((child) => index.byPath.get(joinPath(path, child.name)) ?? []);
+  return node.children.flatMap(
+    (child) => index.byPath.get(joinPath(path, child.name)) ?? [],
+  );
 }
 
 /** Full path for display, starting with the root's name, e.g. "root/src/index.ts". */

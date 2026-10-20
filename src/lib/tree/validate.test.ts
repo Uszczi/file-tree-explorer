@@ -91,17 +91,53 @@ describe("validateTree", () => {
     ["non-object node", folder([42]), "children[0]"],
     ["array node", folder([[]]), "children[0]"],
     ["missing name", folder([{ type: "file", size: 1 }]), "children[0].name"],
-    ["empty name", folder([{ name: " ", type: "file", size: 1 }]), "children[0].name"],
-    ["name with slash", folder([{ name: "a/b", type: "file", size: 1 }]), "children[0].name"],
-    ["reserved name", folder([{ name: "..", type: "file", size: 1 }]), "children[0].name"],
+    [
+      "empty name",
+      folder([{ name: " ", type: "file", size: 1 }]),
+      "children[0].name",
+    ],
+    [
+      "name with slash",
+      folder([{ name: "a/b", type: "file", size: 1 }]),
+      "children[0].name",
+    ],
+    [
+      "reserved name",
+      folder([{ name: "..", type: "file", size: 1 }]),
+      "children[0].name",
+    ],
     ["unknown type", folder([{ name: "a", type: "link" }]), "children[0].type"],
     ["missing size", folder([{ name: "a", type: "file" }]), "children[0].size"],
-    ["string size", folder([{ name: "a", type: "file", size: "1" }]), "children[0].size"],
-    ["negative size", folder([{ name: "a", type: "file", size: -1 }]), "children[0].size"],
-    ["fractional size", folder([{ name: "a", type: "file", size: 1.5 }]), "children[0].size"],
-    ["NaN size", folder([{ name: "a", type: "file", size: Number.NaN }]), "children[0].size"],
-    ["non-array children", folder([{ name: "a", type: "folder", children: {} }]), "children[0].children"],
-    ["null children", folder([{ name: "a", type: "folder", children: null }]), "children[0].children"],
+    [
+      "string size",
+      folder([{ name: "a", type: "file", size: "1" }]),
+      "children[0].size",
+    ],
+    [
+      "negative size",
+      folder([{ name: "a", type: "file", size: -1 }]),
+      "children[0].size",
+    ],
+    [
+      "fractional size",
+      folder([{ name: "a", type: "file", size: 1.5 }]),
+      "children[0].size",
+    ],
+    [
+      "NaN size",
+      folder([{ name: "a", type: "file", size: Number.NaN }]),
+      "children[0].size",
+    ],
+    [
+      "non-array children",
+      folder([{ name: "a", type: "folder", children: {} }]),
+      "children[0].children",
+    ],
+    [
+      "null children",
+      folder([{ name: "a", type: "folder", children: null }]),
+      "children[0].children",
+    ],
   ])("rejects %s", (_label, input, expectedPath) => {
     expect(errorPaths(validateTree(input))).toEqual([expectedPath]);
   });
@@ -116,16 +152,26 @@ describe("validateTree", () => {
 
   it("allows the same name in different folders", () => {
     const input = folder([
-      { name: "a", type: "folder", children: [{ name: "a", type: "file", size: 1 }] },
+      {
+        name: "a",
+        type: "folder",
+        children: [{ name: "a", type: "file", size: 1 }],
+      },
     ]);
     expect(validateTree(input).ok).toBe(true);
   });
 
   it("reports nested paths", () => {
     const input = folder([
-      { name: "src", type: "folder", children: [{ name: "x", type: "file", size: -1 }] },
+      {
+        name: "src",
+        type: "folder",
+        children: [{ name: "x", type: "file", size: -1 }],
+      },
     ]);
-    expect(errorPaths(validateTree(input))).toEqual(["children[0].children[0].size"]);
+    expect(errorPaths(validateTree(input))).toEqual([
+      "children[0].children[0].size",
+    ]);
   });
 
   it("collects multiple errors in input order", () => {
@@ -133,7 +179,10 @@ describe("validateTree", () => {
       { name: "", type: "file", size: 1 },
       { name: "b", type: "file", size: -1 },
     ]);
-    expect(errorPaths(validateTree(input))).toEqual(["children[0].name", "children[1].size"]);
+    expect(errorPaths(validateTree(input))).toEqual([
+      "children[0].name",
+      "children[1].size",
+    ]);
   });
 
   it(`stops after ${MAX_ERRORS} errors`, () => {
@@ -154,7 +203,10 @@ describe("validateTree", () => {
 
 describe("parseTree", () => {
   it("parses and validates in one step", () => {
-    expect(parseTree(JSON.stringify(example))).toEqual({ ok: true, value: example });
+    expect(parseTree(JSON.stringify(example))).toEqual({
+      ok: true,
+      value: example,
+    });
   });
 
   it("returns the JSON syntax error", () => {
@@ -164,8 +216,8 @@ describe("parseTree", () => {
   });
 
   it("returns validation errors", () => {
-    expect(errorPaths(parseTree('{"name":"root","type":"folder","children":1}'))).toEqual([
-      "children",
-    ]);
+    expect(
+      errorPaths(parseTree('{"name":"root","type":"folder","children":1}')),
+    ).toEqual(["children"]);
   });
 });

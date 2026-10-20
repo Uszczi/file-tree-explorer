@@ -20,7 +20,10 @@ interface Candidate {
   readonly order: number;
 }
 
-function byTreeOrder(a: FzfResultItem<Candidate>, b: FzfResultItem<Candidate>): number {
+function byTreeOrder(
+  a: FzfResultItem<Candidate>,
+  b: FzfResultItem<Candidate>,
+): number {
   return a.item.order - b.item.order;
 }
 
@@ -30,7 +33,10 @@ const finders = new WeakMap<TreeIndex, Fzf<readonly Candidate[]>>();
 function getFinder(index: TreeIndex): Fzf<readonly Candidate[]> {
   let finder = finders.get(index);
   if (finder === undefined) {
-    const candidates = [...index.byPath.values()].map((entry, order) => ({ entry, order }));
+    const candidates = [...index.byPath.values()].map((entry, order) => ({
+      entry,
+      order,
+    }));
     finder = new Fzf(candidates, {
       selector: (candidate) => candidate.entry.node.name,
       // fzf's extended syntax: space-separated terms (AND), 'exact, ^prefix, suffix$, !negation, a | b.
@@ -46,12 +52,18 @@ function getFinder(index: TreeIndex): Fzf<readonly Candidate[]> {
 }
 
 /** fzf-style fuzzy search over node names, best matches first. */
-export function searchNodes(index: TreeIndex, query: string, limit = MAX_RESULTS): SearchResults {
+export function searchNodes(
+  index: TreeIndex,
+  query: string,
+  limit = MAX_RESULTS,
+): SearchResults {
   if (query.trim() === "") return { results: [], total: 0 };
 
   const matches = getFinder(index).find(query);
   return {
-    results: matches.slice(0, limit).map(({ item, positions }) => ({ entry: item.entry, positions })),
+    results: matches
+      .slice(0, limit)
+      .map(({ item, positions }) => ({ entry: item.entry, positions })),
     total: matches.length,
   };
 }

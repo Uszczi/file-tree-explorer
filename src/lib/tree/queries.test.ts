@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { buildIndex } from "./buildIndex";
 import type { TreeNode } from "./types";
-import { ancestorPaths, childEntries, displayPath, folderPaths } from "./queries";
+import {
+  ancestorPaths,
+  childEntries,
+  displayPath,
+  folderPaths,
+} from "./queries";
 
 const tree: TreeNode = {
   name: "root",
@@ -27,7 +32,11 @@ const index = buildIndex(tree);
 
 describe("ancestorPaths", () => {
   it("lists ancestors nearest first, ending with the root", () => {
-    expect(ancestorPaths(index, "src/components/Button.tsx")).toEqual(["src/components", "src", ""]);
+    expect(ancestorPaths(index, "src/components/Button.tsx")).toEqual([
+      "src/components",
+      "src",
+      "",
+    ]);
   });
 
   it("returns nothing for the root and unknown paths", () => {
@@ -44,7 +53,9 @@ describe("folderPaths", () => {
 
 describe("childEntries", () => {
   it("returns direct children with their computed sizes", () => {
-    expect(childEntries(index, "src").map((entry) => [entry.path, entry.totalSize])).toEqual([
+    expect(
+      childEntries(index, "src").map((entry) => [entry.path, entry.totalSize]),
+    ).toEqual([
       ["src/index.ts", 1024],
       ["src/components", 512],
     ]);
@@ -52,14 +63,18 @@ describe("childEntries", () => {
 
   it("returns nothing for files, empty folders and unknown paths", () => {
     expect(childEntries(index, "package.json")).toEqual([]);
-    expect(childEntries(buildIndex({ name: "e", type: "folder", children: [] }), "")).toEqual([]);
+    expect(
+      childEntries(buildIndex({ name: "e", type: "folder", children: [] }), ""),
+    ).toEqual([]);
     expect(childEntries(index, "nope")).toEqual([]);
   });
 });
 
 describe("displayPath", () => {
   it("prefixes the path with the root name", () => {
-    expect(displayPath(index, "src/components/Button.tsx")).toBe("root/src/components/Button.tsx");
+    expect(displayPath(index, "src/components/Button.tsx")).toBe(
+      "root/src/components/Button.tsx",
+    );
   });
 
   it("shows just the root name for the root", () => {

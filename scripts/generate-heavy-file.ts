@@ -26,7 +26,9 @@ const ROOT_SUFFIX = "]}";
 function parseArgs(): { target: number; outFile: string } {
   const mbArg = process.argv[2];
   if (mbArg === undefined || !/^\d+$/.test(mbArg)) {
-    console.error("Usage: node scripts/generate-heavy-file.ts <MB> [output-file]");
+    console.error(
+      "Usage: node scripts/generate-heavy-file.ts <MB> [output-file]",
+    );
     process.exit(1);
   }
   const mb = Number(mbArg);
@@ -39,23 +41,37 @@ function parseArgs(): { target: number; outFile: string } {
       `Note: V8 strings max out near 536M chars, so JSON.parse cannot load a ${mb} MB file at once (see src/lib/tree/validate.ts).`,
     );
   }
-  return { target: mb * 1_000_000, outFile: process.argv[3] ?? `data-${mb}mb.json` };
+  return {
+    target: mb * 1_000_000,
+    outFile: process.argv[3] ?? `data-${mb}mb.json`,
+  };
 }
 
 async function generate(target: number, outFile: string): Promise<void> {
   const k = Math.floor(
-    (target - ROOT_PREFIX.length - ROOT_SUFFIX.length - (FOLDERS - 1) - FOLDERS * DIR_LEN) /
+    (target -
+      ROOT_PREFIX.length -
+      ROOT_SUFFIX.length -
+      (FOLDERS - 1) -
+      FOLDERS * DIR_LEN) /
       (FOLDERS * (FILE_LEN + 1)),
   );
   const total =
-    ROOT_PREFIX.length + FOLDERS * (DIR_LEN + k * (FILE_LEN + 1)) + (FOLDERS - 1) + ROOT_SUFFIX.length;
+    ROOT_PREFIX.length +
+    FOLDERS * (DIR_LEN + k * (FILE_LEN + 1)) +
+    (FOLDERS - 1) +
+    ROOT_SUFFIX.length;
   const pad = target - total;
   if (k < 0 || pad < 0) {
-    throw new Error(`target ${target} bytes too small for this layout (max ${total < 0 ? 0 : total})`);
+    throw new Error(
+      `target ${target} bytes too small for this layout (max ${total < 0 ? 0 : total})`,
+    );
   }
 
   const stream = createWriteStream(outFile);
-  const failed = new Promise<never>((_, reject) => stream.once("error", reject));
+  const failed = new Promise<never>((_, reject) =>
+    stream.once("error", reject),
+  );
   const writeChunk = (s: string) =>
     Promise.race([
       new Promise<void>((resolve) => {
@@ -73,7 +89,8 @@ async function generate(target: number, outFile: string): Promise<void> {
       `{"name":"dir-${ds}","type":"folder","children":[` +
       `{"name":"sub-${ds}","type":"folder","children":[`;
     const subParts: string[] = [];
-    for (let j = 0; j < SUBFOLDER_FILES; j++) subParts.push(fileJson(counter++));
+    for (let j = 0; j < SUBFOLDER_FILES; j++)
+      subParts.push(fileJson(counter++));
     chunk += subParts.join(",") + "]}";
     const parts: string[] = [];
     for (let j = 0; j < k; j++) {
@@ -81,7 +98,10 @@ async function generate(target: number, outFile: string): Promise<void> {
       // The last file in the tree absorbs the padding needed for an exact byte size.
       parts.push(
         d === FOLDERS - 1 && j === k - 1
-          ? fileJson(i).replace('","type":"file"', "x".repeat(pad) + '","type":"file"')
+          ? fileJson(i).replace(
+              '","type":"file"',
+              "x".repeat(pad) + '","type":"file"',
+            )
           : fileJson(i),
       );
     }
@@ -89,11 +109,16 @@ async function generate(target: number, outFile: string): Promise<void> {
     await writeChunk(chunk + (d < FOLDERS - 1 ? "," : ""));
   }
   await writeChunk(ROOT_SUFFIX);
-  await Promise.race([new Promise<void>((resolve) => stream.end(resolve)), failed]);
+  await Promise.race([
+    new Promise<void>((resolve) => stream.end(resolve)),
+    failed,
+  ]);
 
   const size = statSync(outFile).size;
   if (size !== target) throw new Error(`size mismatch: ${size} != ${target}`);
-  console.log(`${outFile}: ${size} bytes, ${FOLDERS * (SUBFOLDER_FILES + k) + FOLDERS * 2 + 1} nodes`);
+  console.log(
+    `${outFile}: ${size} bytes, ${FOLDERS * (SUBFOLDER_FILES + k) + FOLDERS * 2 + 1} nodes`,
+  );
 }
 
 const { target, outFile } = parseArgs();

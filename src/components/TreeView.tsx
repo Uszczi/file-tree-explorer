@@ -36,12 +36,16 @@ export function TreeView({ index, activePath }: TreeViewProps) {
     setExpanded(withAncestors(expanded, index, activePath));
   }
 
-  const rows = useMemo(() => getVisibleRows(index, expanded), [index, expanded]);
+  const rows = useMemo(
+    () => getVisibleRows(index, expanded),
+    [index, expanded],
+  );
 
   // Roving tabindex: exactly one row is reachable with Tab, arrows move between rows.
-  const tabbablePath = [focusedPath, activePath].find((path) =>
-    rows.some((row) => row.entry.path === path),
-  ) ?? ROOT_PATH;
+  const tabbablePath =
+    [focusedPath, activePath].find((path) =>
+      rows.some((row) => row.entry.path === path),
+    ) ?? ROOT_PATH;
 
   function setFolderExpanded(path: NodePath, open: boolean) {
     setExpanded((previous) => {
@@ -54,7 +58,9 @@ export function TreeView({ index, activePath }: TreeViewProps) {
 
   function focusRow(path: NodePath) {
     setFocusedPath(path);
-    treeRef.current?.querySelector<HTMLElement>(`[data-path="${CSS.escape(path)}"]`)?.focus();
+    treeRef.current
+      ?.querySelector<HTMLElement>(`[data-path="${CSS.escape(path)}"]`)
+      ?.focus();
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLUListElement>) {
@@ -74,7 +80,8 @@ export function TreeView({ index, activePath }: TreeViewProps) {
         break;
       case "ArrowRight":
         if (folder && !isExpanded) setFolderExpanded(entry.path, true);
-        else if (next?.entry.parentPath === entry.path) focusRow(next.entry.path);
+        else if (next?.entry.parentPath === entry.path)
+          focusRow(next.entry.path);
         break;
       case "ArrowLeft":
         if (folder && isExpanded) setFolderExpanded(entry.path, false);
@@ -95,12 +102,24 @@ export function TreeView({ index, activePath }: TreeViewProps) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className={`text-xs font-medium tracking-wide uppercase ${ui.muted}`}>Files</h2>
+        <h2
+          className={`text-xs font-medium tracking-wide uppercase ${ui.muted}`}
+        >
+          Files
+        </h2>
         <div className="flex gap-1">
-          <button type="button" className={ui.smallButton} onClick={() => setExpanded(new Set(folderPaths(index)))}>
+          <button
+            type="button"
+            className={ui.smallButton}
+            onClick={() => setExpanded(new Set(folderPaths(index)))}
+          >
             Expand all
           </button>
-          <button type="button" className={ui.smallButton} onClick={() => setExpanded(new Set([ROOT_PATH]))}>
+          <button
+            type="button"
+            className={ui.smallButton}
+            onClick={() => setExpanded(new Set([ROOT_PATH]))}
+          >
             Collapse all
           </button>
         </div>
@@ -144,7 +163,10 @@ export function TreeView({ index, activePath }: TreeViewProps) {
                     focusRow(path);
                   }}
                 >
-                  <span aria-hidden="true" className={`transition-transform ${isExpanded ? "rotate-90" : ""}`}>
+                  <span
+                    aria-hidden="true"
+                    className={`transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                  >
                     ▸
                   </span>
                 </button>

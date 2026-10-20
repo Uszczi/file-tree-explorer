@@ -1,4 +1,9 @@
-import { isRouteErrorResponse, Link, useNavigate, useRouteError } from "react-router-dom";
+import {
+  isRouteErrorResponse,
+  Link,
+  useNavigate,
+  useRouteError,
+} from "react-router-dom";
 import { ui } from "../components/ui";
 import { useTree } from "../state/treeContext";
 
@@ -36,7 +41,11 @@ export function ErrorPage() {
           Back to start
         </Link>
         {index !== null && (
-          <button type="button" className={ui.primaryButton} onClick={clearAndRestart}>
+          <button
+            type="button"
+            className={ui.primaryButton}
+            onClick={clearAndRestart}
+          >
             Clear saved tree
           </button>
         )}

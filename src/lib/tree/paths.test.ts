@@ -14,11 +14,16 @@ describe("joinPath", () => {
 
   it("joins nested segments with a slash", () => {
     expect(joinPath("src", "index.ts")).toBe("src/index.ts");
-    expect(joinPath("src/components", "Button.tsx")).toBe("src/components/Button.tsx");
+    expect(joinPath("src/components", "Button.tsx")).toBe(
+      "src/components/Button.tsx",
+    );
   });
 
   it("builds a full path step by step", () => {
-    const path = ["src", "components", "Button.tsx"].reduce(joinPath, ROOT_PATH);
+    const path = ["src", "components", "Button.tsx"].reduce(
+      joinPath,
+      ROOT_PATH,
+    );
     expect(path).toBe("src/components/Button.tsx");
   });
 
@@ -55,12 +60,14 @@ describe("toNodeUrl", () => {
     expect(toNodeUrl(path)).toBe(expected);
   });
 
-  it.each(["src/components/Button.tsx", "dir/my file.txt", "a/#b?/100%.txt", "zażółć/ü.ts"])(
-    "round-trips %j through a single path segment",
-    (path) => {
-      const segment = toNodeUrl(path).slice(`${TREE_URL}/`.length);
-      expect(segment).not.toContain("/");
-      expect(decodeURIComponent(segment)).toBe(path);
-    },
-  );
+  it.each([
+    "src/components/Button.tsx",
+    "dir/my file.txt",
+    "a/#b?/100%.txt",
+    "zażółć/ü.ts",
+  ])("round-trips %j through a single path segment", (path) => {
+    const segment = toNodeUrl(path).slice(`${TREE_URL}/`.length);
+    expect(segment).not.toContain("/");
+    expect(decodeURIComponent(segment)).toBe(path);
+  });
 });

@@ -29,7 +29,10 @@ export function parseJson(text: string): Result<unknown> {
     return { ok: true, value: JSON.parse(text) };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { ok: false, errors: [{ path: "", message: `Invalid JSON: ${message}` }] };
+    return {
+      ok: false,
+      errors: [{ path: "", message: `Invalid JSON: ${message}` }],
+    };
   }
 }
 

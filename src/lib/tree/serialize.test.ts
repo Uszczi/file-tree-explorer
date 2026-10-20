@@ -44,7 +44,11 @@ describe("stringifyForEditor", () => {
   });
 
   it("returns an empty string instead of throwing", () => {
-    const circular = { name: "root", type: "folder", children: [] as TreeNode[] };
+    const circular = {
+      name: "root",
+      type: "folder",
+      children: [] as TreeNode[],
+    };
     circular.children.push(circular as TreeNode);
     expect(stringifyForEditor(circular as TreeNode)).toBe("");
   });

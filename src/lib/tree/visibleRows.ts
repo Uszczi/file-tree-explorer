@@ -9,7 +9,10 @@ export interface VisibleRow {
 
 // Flattens the expanded part of the tree into display order, so the view can render
 // a plain list (no recursive components) and keyboard navigation is just index +/- 1.
-export function getVisibleRows(index: TreeIndex, expanded: ReadonlySet<NodePath>): VisibleRow[] {
+export function getVisibleRows(
+  index: TreeIndex,
+  expanded: ReadonlySet<NodePath>,
+): VisibleRow[] {
   const rows: VisibleRow[] = [];
   const stack: NodePath[] = [ROOT_PATH];
 

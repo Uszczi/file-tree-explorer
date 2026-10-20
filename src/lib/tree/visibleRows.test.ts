@@ -71,7 +71,9 @@ describe("getVisibleRows", () => {
 
   it("handles a single file root", () => {
     const fileIndex = buildIndex({ name: "a.txt", type: "file", size: 1 });
-    expect(getVisibleRows(fileIndex, new Set([""])).map((row) => row.expanded)).toEqual([false]);
+    expect(
+      getVisibleRows(fileIndex, new Set([""])).map((row) => row.expanded),
+    ).toEqual([false]);
   });
 
   it("handles a fully expanded very deep tree", () => {
@@ -80,6 +82,8 @@ describe("getVisibleRows", () => {
       node = { name: "d", type: "folder", children: [node] };
     }
     const deepIndex = buildIndex(node);
-    expect(getVisibleRows(deepIndex, new Set(folderPaths(deepIndex)))).toHaveLength(10_001);
+    expect(
+      getVisibleRows(deepIndex, new Set(folderPaths(deepIndex))),
+    ).toHaveLength(10_001);
   });
 });

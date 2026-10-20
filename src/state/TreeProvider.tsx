@@ -1,6 +1,11 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { buildIndex } from "../lib/tree/buildIndex";
-import { clearStoredTree, getBrowserStorage, loadTree, saveTree } from "../lib/tree/storage";
+import {
+  clearStoredTree,
+  getBrowserStorage,
+  loadTree,
+  saveTree,
+} from "../lib/tree/storage";
 import type { TreeIndex, TreeNode } from "../lib/tree/types";
 import { TreeContext, type TreeContextValue } from "./treeContext";
 

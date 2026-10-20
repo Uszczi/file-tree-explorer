@@ -41,11 +41,15 @@ describe("examples", () => {
   ])("%s reports the expected error paths", (id, expectedPaths) => {
     const example = INVALID_EXAMPLES.find((candidate) => candidate.id === id);
     const result = parseTree(example!.text());
-    expect(result.ok ? [] : result.errors.map((error) => error.path)).toEqual(expectedPaths);
+    expect(result.ok ? [] : result.errors.map((error) => error.path)).toEqual(
+      expectedPaths,
+    );
   });
 
   it("caps the many-errors example", () => {
-    const example = INVALID_EXAMPLES.find((candidate) => candidate.id === "many-errors");
+    const example = INVALID_EXAMPLES.find(
+      (candidate) => candidate.id === "many-errors",
+    );
     const result = parseTree(example!.text());
     expect(result.ok ? 0 : result.errors.length).toBe(MAX_ERRORS);
   });
