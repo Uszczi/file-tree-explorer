@@ -1,24 +1,11 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.e2e.tsbuildinfo",
-    "target": "es2023",
     "lib": ["ES2023", "DOM"],
     "types": ["node"],
-    "skipLibCheck": true,
-
-    /* Bundler mode */
     "module": "esnext",
-    "moduleResolution": "bundler",
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "moduleResolution": "bundler"
   },
   "include": ["e2e", "playwright.config.ts"]
 }
