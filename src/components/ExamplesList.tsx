@@ -16,7 +16,7 @@ export function ExamplesList({ onSelect }: ExamplesListProps) {
       <h2 id="examples-heading" className="text-sm font-semibold">
         Examples
       </h2>
-      <p className={`mt-1 text-xs ${ui.muted}`}>Click to load one into the editor.</p>
+      <p className={`mt-1 text-xs ${ui.muted}`}>Click to insert one into the editor, then load it.</p>
 
       {GROUPS.map((group) => (
         <div key={group.title} className="mt-4">

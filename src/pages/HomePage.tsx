@@ -1,4 +1,10 @@
-import { useId, useState, type ChangeEvent, type DragEvent, type FormEvent } from "react";
+import {
+  useId,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type FormEvent,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ExamplesList } from "../components/ExamplesList";
 import { ui } from "../components/ui";
@@ -11,7 +17,9 @@ import { useTree } from "../state/treeContext";
 export function HomePage() {
   const { index, load } = useTree();
   const navigate = useNavigate();
-  const [text, setText] = useState("");
+  const [text, setText] = useState(() =>
+    index === null ? "" : JSON.stringify(index.root, null, 2),
+  );
   const [errors, setErrors] = useState<readonly ValidationError[]>([]);
   const textareaId = useId();
   const errorsId = useId();
@@ -63,9 +71,9 @@ export function HomePage() {
     void loadFile(file);
   }
 
-  function loadExample(exampleText: string) {
+  function insertExample(exampleText: string) {
     setText(exampleText);
-    loadText(exampleText);
+    setErrors([]);
   }
 
   const hasErrors = errors.length > 0;
@@ -75,16 +83,20 @@ export function HomePage() {
       <title>FileTree Explorer</title>
 
       <header className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight">📂 FileTree Explorer</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          📂 FileTree Explorer
+        </h1>
         <p className={`mt-2 ${ui.muted}`}>
-          Paste or upload a JSON description of a directory tree to browse and search it.
+          Paste or upload a JSON description of a directory tree to browse and
+          search it.
         </p>
       </header>
 
       {index !== null && (
         <p className="mb-6 flex flex-wrap items-center gap-x-2 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm dark:border-sky-900 dark:bg-sky-950">
           <span>
-            A tree is already loaded: <strong className="break-all">{index.root.name}</strong>
+            A tree is already loaded:{" "}
+            <strong className="break-all">{index.root.name}</strong>
           </span>
           <Link to={TREE_URL} className={ui.link}>
             Open it →
@@ -93,7 +105,10 @@ export function HomePage() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <form onSubmit={handleSubmit} className={`${ui.card} flex flex-col gap-3 p-4 md:p-6`}>
+        <form
+          onSubmit={handleSubmit}
+          className={`${ui.card} flex flex-col gap-3 p-4 md:p-6`}
+        >
           <label htmlFor={textareaId} className={ui.label}>
             Tree JSON
           </label>
@@ -105,17 +120,25 @@ export function HomePage() {
             onDrop={handleDrop}
             rows={18}
             spellCheck={false}
-            placeholder={'{ "name": "root", "type": "folder", "children": [...] }'}
+            placeholder={
+              '{ "name": "root", "type": "folder", "children": [...] }'
+            }
             aria-invalid={hasErrors}
             aria-describedby={hasErrors ? errorsId : undefined}
             className={`${ui.input} min-h-64 resize-y font-mono text-xs leading-relaxed`}
           />
-          <p className={`text-xs ${ui.muted}`}>Tip: you can also drop a .json file onto the editor.</p>
+          <p className={`text-xs ${ui.muted}`}>
+            Tip: you can also drop a .json file onto the editor.
+          </p>
 
           <ValidationErrors id={errorsId} errors={errors} />
 
           <div className="flex flex-wrap items-center gap-2">
-            <button type="submit" className={ui.primaryButton} disabled={text.trim() === ""}>
+            <button
+              type="submit"
+              className={ui.primaryButton}
+              disabled={text.trim() === ""}
+            >
               Load tree
             </button>
             {/* The input is visually hidden; the label acts as the button and shows its focus. */}
@@ -145,7 +168,7 @@ export function HomePage() {
           </div>
         </form>
 
-        <ExamplesList onSelect={loadExample} />
+        <ExamplesList onSelect={insertExample} />
       </div>
     </main>
   );
