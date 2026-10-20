@@ -11,6 +11,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "fzf": "^0.5.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^6.30.6"

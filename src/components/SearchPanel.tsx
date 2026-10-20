@@ -1,4 +1,11 @@
-import { useEffect, useId, useMemo, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { ROOT_PATH, SEARCH_PARAM } from "../lib/tree/paths";
 import { displayPath } from "../lib/tree/queries";
@@ -15,15 +22,21 @@ interface SearchPanelProps {
 
 function HighlightedName({ result }: { readonly result: SearchResult }) {
   const { name } = result.entry.node;
-  if (result.match === null) return <>{name}</>;
-  const { start, length } = result.match;
-  return (
-    <>
-      {name.slice(0, start)}
-      <mark>{name.slice(start, start + length)}</mark>
-      {name.slice(start + length)}
-    </>
-  );
+  const parts: ReactNode[] = [];
+  let runStart = 0;
+
+  for (let position = 1; position <= name.length; position++) {
+    const isMatch = result.positions.has(position - 1);
+    const endsRun =
+      position === name.length || result.positions.has(position) !== isMatch;
+    if (!endsRun) continue;
+
+    const text = name.slice(runStart, position);
+    parts.push(isMatch ? <mark key={runStart}>{text}</mark> : text);
+    runStart = position;
+  }
+
+  return <>{parts}</>;
 }
 
 export function SearchPanel({ index }: SearchPanelProps) {
@@ -33,14 +46,12 @@ export function SearchPanel({ index }: SearchPanelProps) {
   const [input, setInput] = useState(query);
   const inputId = useId();
 
-  // The URL is the source of truth: follow it when it changes from outside (back button, link).
   const [syncedQuery, setSyncedQuery] = useState(query);
   if (query !== syncedQuery) {
     setSyncedQuery(query);
     setInput(query);
   }
 
-  // Write the input to the URL after typing pauses; replace so history isn't flooded with keystrokes.
   useEffect(() => {
     const nextQuery = input.trim() === "" ? "" : input;
     if (nextQuery === query) return;
@@ -59,7 +70,10 @@ export function SearchPanel({ index }: SearchPanelProps) {
     return () => clearTimeout(timeout);
   }, [input, query, setSearchParams]);
 
-  const { results, total } = useMemo(() => searchNodes(index, query), [index, query]);
+  const { results, total } = useMemo(
+    () => searchNodes(index, query),
+    [index, query],
+  );
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Escape") setInput("");
@@ -76,7 +90,7 @@ export function SearchPanel({ index }: SearchPanelProps) {
         value={input}
         onChange={(event) => setInput(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Search by name…"
+        placeholder="Fuzzy search, e.g. btn…"
         autoComplete="off"
         spellCheck={false}
         className={ui.input}
@@ -100,14 +114,20 @@ export function SearchPanel({ index }: SearchPanelProps) {
                     path={result.entry.path}
                     aria-current={isActive ? "page" : undefined}
                     className={`flex flex-col rounded-md px-2 py-1.5 ${ui.focusRing} ${
-                      isActive ? "bg-sky-100 dark:bg-sky-500/15" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      isActive
+                        ? "bg-sky-100 dark:bg-sky-500/15"
+                        : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
                     }`}
                   >
                     <span className="text-sm font-medium break-all">
-                      <span aria-hidden="true">{result.entry.node.type === "folder" ? "📁" : "📄"}</span>{" "}
+                      <span aria-hidden="true">
+                        {result.entry.node.type === "folder" ? "📁" : "📄"}
+                      </span>{" "}
                       <HighlightedName result={result} />
                     </span>
-                    <span className={`text-xs break-all ${ui.muted}`}>{displayPath(index, result.entry.path)}</span>
+                    <span className={`text-xs break-all ${ui.muted}`}>
+                      {displayPath(index, result.entry.path)}
+                    </span>
                   </NodeLink>
                 </li>
               );

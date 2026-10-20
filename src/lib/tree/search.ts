@@ -1,16 +1,12 @@
+import { byLengthAsc, extendedMatch, Fzf, type FzfResultItem } from "fzf";
 import type { IndexedNode, TreeIndex } from "./types";
 
 export const MAX_RESULTS = 100;
 
-export interface SearchMatch {
-  readonly start: number;
-  readonly length: number;
-}
-
 export interface SearchResult {
   readonly entry: IndexedNode;
-  /** Position of the match in the name, or null when it cannot be mapped back reliably. */
-  readonly match: SearchMatch | null;
+  /** Indexes of matched characters in the name, as UTF-16 offsets (like string.slice). */
+  readonly positions: ReadonlySet<number>;
 }
 
 export interface SearchResults {
@@ -19,32 +15,43 @@ export interface SearchResults {
   readonly total: number;
 }
 
-// NFC so that "é" typed on one system matches "é" stored decomposed (e.g. macOS file names).
-function normalize(text: string): string {
-  return text.normalize("NFC").toLowerCase();
+interface Candidate {
+  readonly entry: IndexedNode;
+  readonly order: number;
 }
 
-/** Case-insensitive substring search over node names, in tree order. */
-export function searchNodes(index: TreeIndex, query: string, limit = MAX_RESULTS): SearchResults {
-  const needle = normalize(query.trim());
-  if (needle === "") return { results: [], total: 0 };
+function byTreeOrder(a: FzfResultItem<Candidate>, b: FzfResultItem<Candidate>): number {
+  return a.item.order - b.item.order;
+}
 
-  const results: SearchResult[] = [];
-  let total = 0;
+// Building the finder walks every node, so it is done once per loaded tree.
+const finders = new WeakMap<TreeIndex, Fzf<readonly Candidate[]>>();
 
-  for (const entry of index.byPath.values()) {
-    const { name } = entry.node;
-    const haystack = normalize(name);
-    const start = haystack.indexOf(needle);
-    if (start === -1) continue;
-
-    total++;
-    if (results.length < limit) {
-      // Normalizing can change the length (e.g. decomposed characters); then offsets don't apply.
-      const match = haystack.length === name.length ? { start, length: needle.length } : null;
-      results.push({ entry, match });
-    }
+function getFinder(index: TreeIndex): Fzf<readonly Candidate[]> {
+  let finder = finders.get(index);
+  if (finder === undefined) {
+    const candidates = [...index.byPath.values()].map((entry, order) => ({ entry, order }));
+    finder = new Fzf(candidates, {
+      selector: (candidate) => candidate.entry.node.name,
+      // fzf's extended syntax: space-separated terms (AND), 'exact, ^prefix, suffix$, !negation, a | b.
+      match: extendedMatch,
+      casing: "smart-case",
+      // Lets "zolw" find "żółw".
+      normalize: true,
+      tiebreakers: [byLengthAsc, byTreeOrder],
+    });
+    finders.set(index, finder);
   }
+  return finder;
+}
 
-  return { results, total };
+/** fzf-style fuzzy search over node names, best matches first. */
+export function searchNodes(index: TreeIndex, query: string, limit = MAX_RESULTS): SearchResults {
+  if (query.trim() === "") return { results: [], total: 0 };
+
+  const matches = getFinder(index).find(query);
+  return {
+    results: matches.slice(0, limit).map(({ item, positions }) => ({ entry: item.entry, positions })),
+    total: matches.length,
+  };
 }
