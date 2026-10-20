@@ -20,8 +20,8 @@ export function ErrorPage() {
   const { index, clear } = useTree();
   const navigate = useNavigate();
 
-  function clearAndRestart() {
-    clear();
+  async function clearAndRestart() {
+    await clear();
     navigate("/", { replace: true });
   }
 

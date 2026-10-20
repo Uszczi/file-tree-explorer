@@ -2,10 +2,11 @@ import { createContext, useContext } from "react";
 import type { TreeIndex, TreeNode } from "../lib/tree/types";
 
 export interface TreeContextValue {
+  readonly hydrated: boolean;
   readonly index: TreeIndex | null;
   readonly persisted: boolean;
   readonly load: (tree: TreeNode) => void;
-  readonly clear: () => void;
+  readonly clear: () => Promise<void>;
 }
 
 export const TreeContext = createContext<TreeContextValue | null>(null);

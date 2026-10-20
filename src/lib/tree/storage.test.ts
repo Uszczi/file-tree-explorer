@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  clearStoredTree,
-  getBrowserStorage,
-  loadTree,
-  saveTree,
-  serializeTree,
-  STORAGE_KEY,
-  type KeyValueStorage,
-} from "./storage";
+import { serializeTree } from "./serialize";
+import { clearStoredTree, loadTree, saveTree, type TextStore } from "./storage";
 import type { TreeNode } from "./types";
 
 const tree: TreeNode = {
@@ -16,122 +9,81 @@ const tree: TreeNode = {
   children: [{ name: "a.txt", type: "file", size: 10 }],
 };
 
-function memoryStorage(initial: Record<string, string> = {}) {
-  const data = new Map(Object.entries(initial));
-  const storage: KeyValueStorage = {
-    getItem: (key) => data.get(key) ?? null,
-    setItem: (key, value) => {
-      data.set(key, value);
+function memoryStore(initial?: string) {
+  const state = { text: initial };
+  const store: TextStore = {
+    get: async () => state.text,
+    set: async (text) => {
+      state.text = text;
     },
-    removeItem: (key) => {
-      data.delete(key);
+    delete: async () => {
+      state.text = undefined;
     },
   };
-  return { storage, data };
+  return { store, state };
 }
 
-const throwingStorage: KeyValueStorage = {
-  getItem: () => {
-    throw new Error("SecurityError");
-  },
-  setItem: () => {
-    throw new Error("QuotaExceededError");
-  },
-  removeItem: () => {
-    throw new Error("SecurityError");
-  },
+const failingStore: TextStore = {
+  get: () => Promise.reject(new Error("SecurityError")),
+  set: () => Promise.reject(new Error("QuotaExceededError")),
+  delete: () => Promise.reject(new Error("SecurityError")),
 };
 
-describe("getBrowserStorage", () => {
-  it("returns null when there is no window", () => {
-    expect(getBrowserStorage()).toBeNull();
-  });
-});
-
 describe("saveTree / loadTree", () => {
-  it("round-trips a tree", () => {
-    const { storage } = memoryStorage();
-    expect(saveTree(storage, tree)).toBe(true);
-    expect(loadTree(storage)).toEqual(tree);
+  it("round-trips a tree", async () => {
+    const { store } = memoryStore();
+    await expect(saveTree(store, tree)).resolves.toBe(true);
+    await expect(loadTree(store)).resolves.toEqual(tree);
   });
 
-  it("returns null when nothing is stored", () => {
-    expect(loadTree(memoryStorage().storage)).toBeNull();
+  it("stores compact JSON text", async () => {
+    const { store, state } = memoryStore();
+    await saveTree(store, tree);
+    expect(state.text).toBe(serializeTree(tree));
   });
 
-  it("works without storage", () => {
-    expect(saveTree(null, tree)).toBe(false);
-    expect(loadTree(null)).toBeNull();
-    expect(() => clearStoredTree(null)).not.toThrow();
+  it("returns null when nothing is stored", async () => {
+    await expect(loadTree(memoryStore().store)).resolves.toBeNull();
   });
 
-  it("reports failure instead of throwing when storage is full or blocked", () => {
-    expect(saveTree(throwingStorage, tree)).toBe(false);
-    expect(loadTree(throwingStorage)).toBeNull();
-    expect(() => clearStoredTree(throwingStorage)).not.toThrow();
+  it("works without storage", async () => {
+    await expect(saveTree(null, tree)).resolves.toBe(false);
+    await expect(loadTree(null)).resolves.toBeNull();
+    await expect(clearStoredTree(null)).resolves.toBeUndefined();
   });
 
-  it("drops the previously saved tree when saving fails", () => {
-    const { storage, data } = memoryStorage({
-      [STORAGE_KEY]: JSON.stringify(tree),
-    });
-    const fullStorage: KeyValueStorage = {
-      ...storage,
-      setItem: () => {
-        throw new Error("QuotaExceededError");
-      },
+  it("reports failure instead of rejecting when storage is full or blocked", async () => {
+    await expect(saveTree(failingStore, tree)).resolves.toBe(false);
+    await expect(loadTree(failingStore)).resolves.toBeNull();
+    await expect(clearStoredTree(failingStore)).resolves.toBeUndefined();
+  });
+
+  it("drops the previously saved tree when saving fails", async () => {
+    const { store, state } = memoryStore(JSON.stringify(tree));
+    const fullStore: TextStore = {
+      ...store,
+      set: () => Promise.reject(new Error("QuotaExceededError")),
     };
-    expect(saveTree(fullStorage, tree)).toBe(false);
-    expect(data.has(STORAGE_KEY)).toBe(false);
+    await expect(saveTree(fullStore, tree)).resolves.toBe(false);
+    expect(state.text).toBeUndefined();
   });
 
   it.each([
     ["invalid JSON", "{"],
     ["an invalid tree", JSON.stringify({ name: "root", type: "file" })],
-  ])("drops %s from storage", (_label, stored) => {
-    const { storage, data } = memoryStorage({ [STORAGE_KEY]: stored });
-    expect(loadTree(storage)).toBeNull();
-    expect(data.has(STORAGE_KEY)).toBe(false);
+  ])("drops %s from storage", async (_label, stored) => {
+    const { store, state } = memoryStore(stored);
+    await expect(loadTree(store)).resolves.toBeNull();
+    expect(state.text).toBeUndefined();
   });
 
-  it("handles a very deep tree", () => {
+  it("handles a very deep tree", async () => {
     let node: TreeNode = { name: "leaf", type: "file", size: 1 };
     for (let level = 0; level < 10_000; level++) {
       node = { name: "d", type: "folder", children: [node] };
     }
-    const { storage } = memoryStorage();
-    expect(saveTree(storage, node)).toBe(true);
-    expect(loadTree(storage)?.type).toBe("folder");
-  });
-});
-
-describe("serializeTree", () => {
-  it("matches JSON.stringify", () => {
-    const nested: TreeNode = {
-      name: 'quote " and \\ slash',
-      type: "folder",
-      children: [
-        tree,
-        { name: "empty", type: "folder", children: [] },
-        { name: "ż.bin", type: "file", size: 0 },
-      ],
-    };
-    expect(serializeTree(nested)).toBe(JSON.stringify(nested));
-  });
-
-  it("does not overflow the stack on a very deep tree", () => {
-    let node: TreeNode = { name: "leaf", type: "file", size: 1 };
-    for (let level = 0; level < 100_000; level++) {
-      node = { name: "d", type: "folder", children: [node] };
-    }
-    expect(() => serializeTree(node)).not.toThrow();
-  });
-});
-
-describe("clearStoredTree", () => {
-  it("removes only the tree key", () => {
-    const { storage, data } = memoryStorage({ [STORAGE_KEY]: "x", other: "y" });
-    clearStoredTree(storage);
-    expect([...data.keys()]).toEqual(["other"]);
+    const { store } = memoryStore();
+    await expect(saveTree(store, node)).resolves.toBe(true);
+    expect((await loadTree(store))?.type).toBe("folder");
   });
 });

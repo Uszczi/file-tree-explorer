@@ -23,8 +23,8 @@ export function TreeLayout() {
     return <Navigate to="/" replace />;
   }
 
-  function closeTree() {
-    clear();
+  async function closeTree() {
+    await clear();
     navigate("/");
   }
 
@@ -55,8 +55,8 @@ export function TreeLayout() {
           role="status"
           className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          This tree could not be saved in browser storage and will be lost after
-          a page reload.
+          This tree could not be saved in the browser and will be lost after a
+          page reload.
         </p>
       )}
 
