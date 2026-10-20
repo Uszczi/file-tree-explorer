@@ -1,13 +1,19 @@
-import { EXAMPLES, type Example } from "./examples";
+import { INVALID_EXAMPLES, VALID_EXAMPLES, type Example } from "./examples";
 import { ui } from "./ui";
 
 interface ExamplesListProps {
   readonly onSelect: (text: string) => void;
 }
 
-const GROUPS: readonly { readonly title: string; readonly examples: readonly Example[] }[] = [
-  { title: "Valid", examples: EXAMPLES.filter((example) => example.valid) },
-  { title: "With errors", examples: EXAMPLES.filter((example) => !example.valid) },
+interface ExampleGroup {
+  readonly title: string;
+  readonly examples: readonly Example[];
+  readonly dotClass: string;
+}
+
+const GROUPS: readonly ExampleGroup[] = [
+  { title: "Valid", examples: VALID_EXAMPLES, dotClass: "bg-emerald-500" },
+  { title: "With errors", examples: INVALID_EXAMPLES, dotClass: "bg-red-500" },
 ];
 
 export function ExamplesList({ onSelect }: ExamplesListProps) {
@@ -31,7 +37,7 @@ export function ExamplesList({ onSelect }: ExamplesListProps) {
                 >
                   <span
                     aria-hidden="true"
-                    className={`size-1.5 shrink-0 rounded-full ${example.valid ? "bg-emerald-500" : "bg-red-500"}`}
+                    className={`size-1.5 shrink-0 rounded-full ${group.dotClass}`}
                   />
                   {example.label}
                 </button>

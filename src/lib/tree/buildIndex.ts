@@ -1,3 +1,4 @@
+import { isFolder } from "./nodes";
 import { joinPath, ROOT_PATH } from "./paths";
 import type { IndexedNode, NodePath, TreeIndex, TreeNode } from "./types";
 
@@ -19,7 +20,7 @@ export function buildIndex(root: TreeNode): TreeIndex {
     const draft = stack.pop()!;
     visitOrder.push(draft);
 
-    if (draft.node.type === "file") {
+    if (!isFolder(draft.node)) {
       draft.totalSize = draft.node.size;
       continue;
     }

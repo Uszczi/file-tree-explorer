@@ -1,18 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { EXAMPLES } from "./examples";
+import { INVALID_EXAMPLES, VALID_EXAMPLES } from "./examples";
 import { MAX_ERRORS, parseTree } from "../lib/tree/validate";
 
-describe("EXAMPLES", () => {
+const ALL_EXAMPLES = [...VALID_EXAMPLES, ...INVALID_EXAMPLES];
+
+describe("examples", () => {
   it("have unique ids", () => {
-    const ids = EXAMPLES.map((example) => example.id);
+    const ids = ALL_EXAMPLES.map((example) => example.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it.each(EXAMPLES.filter((example) => example.valid))("$label is valid", (example) => {
+  it.each(VALID_EXAMPLES)("$label is valid", (example) => {
     expect(parseTree(example.text()).ok).toBe(true);
   });
 
-  it.each(EXAMPLES.filter((example) => !example.valid))("$label is invalid", (example) => {
+  it.each(INVALID_EXAMPLES)("$label is invalid", (example) => {
     expect(parseTree(example.text()).ok).toBe(false);
   });
 
@@ -37,13 +39,13 @@ describe("EXAMPLES", () => {
     ["nested-error", ["children[0].children[0].children[0].size"]],
     ["wrong-root", [""]],
   ])("%s reports the expected error paths", (id, expectedPaths) => {
-    const example = EXAMPLES.find((candidate) => candidate.id === id);
+    const example = INVALID_EXAMPLES.find((candidate) => candidate.id === id);
     const result = parseTree(example!.text());
     expect(result.ok ? [] : result.errors.map((error) => error.path)).toEqual(expectedPaths);
   });
 
   it("caps the many-errors example", () => {
-    const example = EXAMPLES.find((candidate) => candidate.id === "many-errors");
+    const example = INVALID_EXAMPLES.find((candidate) => candidate.id === "many-errors");
     const result = parseTree(example!.text());
     expect(result.ok ? 0 : result.errors.length).toBe(MAX_ERRORS);
   });

@@ -1,3 +1,4 @@
+import { isFolder } from "./nodes";
 import { joinPath, ROOT_PATH } from "./paths";
 import type { IndexedNode, NodePath, TreeIndex } from "./types";
 
@@ -17,10 +18,10 @@ export function getVisibleRows(index: TreeIndex, expanded: ReadonlySet<NodePath>
     if (entry === undefined) continue;
 
     const { node, path } = entry;
-    const isExpanded = node.type === "folder" && expanded.has(path);
+    const isExpanded = isFolder(node) && expanded.has(path);
     rows.push({ entry, expanded: isExpanded });
 
-    if (node.type === "folder" && isExpanded) {
+    if (isFolder(node) && isExpanded) {
       for (let child = node.children.length - 1; child >= 0; child--) {
         stack.push(joinPath(path, node.children[child].name));
       }

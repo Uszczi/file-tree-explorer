@@ -10,7 +10,6 @@ export const routes: RouteObject[] = [
   {
     path: TREE_URL,
     element: <TreeLayout />,
-    // Optional segment: "/tree" shows the root, "/tree/<encoded path>" any other node.
     children: [{ path: ":nodePath?", element: <NodeDetailsPage /> }],
   },
   { path: "*", element: <NotFoundPage /> },

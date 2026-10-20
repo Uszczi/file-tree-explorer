@@ -1,6 +1,5 @@
 import { expect, type Page } from "@playwright/test";
 
-/** Inserts one of the built-in examples into the editor and loads it. */
 export async function loadExample(page: Page, label: string): Promise<void> {
   await page.goto("/");
   await page.getByRole("button", { name: label, exact: true }).click();

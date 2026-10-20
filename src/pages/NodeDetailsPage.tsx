@@ -1,8 +1,10 @@
 import { useParams } from "react-router-dom";
 import { Breadcrumbs } from "../components/Breadcrumbs";
+import { NodeIcon } from "../components/NodeIcon";
 import { NodeLink } from "../components/NodeLink";
 import { ui } from "../components/ui";
 import { formatSize } from "../lib/tree/formatSize";
+import { isFolder, nodeTypeLabel } from "../lib/tree/nodes";
 import { ROOT_PATH } from "../lib/tree/paths";
 import { childEntries, displayPath } from "../lib/tree/queries";
 import type { IndexedNode, TreeIndex } from "../lib/tree/types";
@@ -21,10 +23,6 @@ function plural(count: number, word: string): string {
 interface DetailsProps {
   readonly index: TreeIndex;
   readonly entry: IndexedNode;
-}
-
-function NodeIcon({ entry }: { readonly entry: IndexedNode }) {
-  return <span aria-hidden="true">{entry.node.type === "folder" ? "📁" : "📄"}</span>;
 }
 
 function ParentLink({ index, entry }: DetailsProps) {
@@ -65,7 +63,7 @@ function FileDetails({ index, entry }: DetailsProps) {
 
 function FolderDetails({ index, entry }: DetailsProps) {
   const children = childEntries(index, entry.path);
-  const folderCount = children.filter((child) => child.node.type === "folder").length;
+  const folderCount = children.filter((child) => isFolder(child.node)).length;
   const fileCount = children.length - folderCount;
 
   return (
@@ -122,10 +120,10 @@ function FolderDetails({ index, entry }: DetailsProps) {
                 <tr key={child.path} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                   <td className="px-3 py-2">
                     <NodeLink path={child.path} className={`${ui.link} break-all`}>
-                      <NodeIcon entry={child} /> {child.node.name}
+                      <NodeIcon node={child.node} /> {child.node.name}
                     </NodeLink>
                   </td>
-                  <td className={`px-3 py-2 ${ui.muted}`}>{child.node.type === "folder" ? "Folder" : "File"}</td>
+                  <td className={`px-3 py-2 ${ui.muted}`}>{nodeTypeLabel(child.node)}</td>
                   <td className="px-3 py-2 text-right whitespace-nowrap tabular-nums">
                     <Size bytes={child.totalSize} />
                   </td>
@@ -161,7 +159,7 @@ export function NodeDetailsPage() {
     );
   }
 
-  const isFolder = entry.node.type === "folder";
+  const folder = isFolder(entry.node);
 
   return (
     <section>
@@ -169,19 +167,19 @@ export function NodeDetailsPage() {
       <Breadcrumbs index={index} path={entry.path} />
       <h2 className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xl font-semibold tracking-tight">
         <span className="break-all">
-          <NodeIcon entry={entry} /> {entry.node.name}
+          <NodeIcon node={entry.node} /> {entry.node.name}
         </span>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-            isFolder
+            folder
               ? "bg-amber-100 text-amber-800 dark:bg-amber-400/15 dark:text-amber-300"
               : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
           }`}
         >
-          {isFolder ? "Folder" : "File"}
+          {nodeTypeLabel(entry.node)}
         </span>
       </h2>
-      {isFolder ? <FolderDetails index={index} entry={entry} /> : <FileDetails index={index} entry={entry} />}
+      {folder ? <FolderDetails index={index} entry={entry} /> : <FileDetails index={index} entry={entry} />}
     </section>
   );
 }

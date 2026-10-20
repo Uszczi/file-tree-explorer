@@ -1,4 +1,11 @@
-import { Link, Navigate, Outlet, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  Outlet,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { SearchPanel } from "../components/SearchPanel";
 import { TreeView } from "../components/TreeView";
 import { ui } from "../components/ui";
@@ -8,7 +15,6 @@ import { useTree } from "../state/treeContext";
 export function TreeLayout() {
   const { index, persisted, clear } = useTree();
   const navigate = useNavigate();
-  // The layout sees the child route's param, so the tree can highlight the open node.
   const { nodePath = ROOT_PATH } = useParams();
   const [searchParams] = useSearchParams();
   const isSearching = (searchParams.get(SEARCH_PARAM) ?? "") !== "";
@@ -25,11 +31,17 @@ export function TreeLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90">
-        <Link to="/" className={`shrink-0 rounded-sm font-semibold tracking-tight ${ui.focusRing}`}>
+        <Link
+          to="/"
+          className={`shrink-0 rounded-sm font-semibold tracking-tight ${ui.focusRing}`}
+        >
           📂 FileTree Explorer
         </Link>
         <div className="flex min-w-0 items-center gap-3">
-          <span className={`truncate text-sm ${ui.muted}`} title={index.root.name}>
+          <span
+            className={`truncate text-sm ${ui.muted}`}
+            title={index.root.name}
+          >
             {index.root.name}
           </span>
           <button type="button" className={ui.button} onClick={closeTree}>
@@ -43,7 +55,8 @@ export function TreeLayout() {
           role="status"
           className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          This tree could not be saved in browser storage and will be lost after a page reload.
+          This tree could not be saved in browser storage and will be lost after
+          a page reload.
         </p>
       )}
 

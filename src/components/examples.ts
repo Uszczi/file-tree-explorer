@@ -3,7 +3,6 @@ import type { TreeNode } from "../lib/tree/types";
 export interface Example {
   readonly id: string;
   readonly label: string;
-  readonly valid: boolean;
   /** Generated on demand, since some examples are large. */
   readonly text: () => string;
 }
@@ -127,14 +126,13 @@ function json(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-export const EXAMPLES: readonly Example[] = [
-  { id: "assignment", label: "Assignment example", valid: true, text: () => json(ASSIGNMENT_TREE) },
-  { id: "web-app", label: "Web app (B to GB sizes)", valid: true, text: () => json(WEB_APP_TREE) },
-  { id: "special-names", label: "Special characters in names", valid: true, text: () => json(SPECIAL_NAMES_TREE) },
+export const VALID_EXAMPLES: readonly Example[] = [
+  { id: "assignment", label: "Assignment example", text: () => json(ASSIGNMENT_TREE) },
+  { id: "web-app", label: "Web app (B to GB sizes)", text: () => json(WEB_APP_TREE) },
+  { id: "special-names", label: "Special characters in names", text: () => json(SPECIAL_NAMES_TREE) },
   {
     id: "missing-children",
     label: "Folders without children",
-    valid: true,
     text: () =>
       json({
         name: "root",
@@ -148,16 +146,16 @@ export const EXAMPLES: readonly Example[] = [
   {
     id: "single-file",
     label: "Single file as root",
-    valid: true,
     text: () => json({ name: "notes.txt", type: "file", size: 777 }),
   },
-  { id: "deep", label: "Deep nesting (200 levels)", valid: true, text: () => json(deepTree(200)) },
-  { id: "large", label: "Large (100 folders × 100 files)", valid: true, text: () => json(wideTree(100, 100)) },
+  { id: "deep", label: "Deep nesting (200 levels)", text: () => json(deepTree(200)) },
+  { id: "large", label: "Large (100 folders × 100 files)", text: () => json(wideTree(100, 100)) },
+];
 
+export const INVALID_EXAMPLES: readonly Example[] = [
   {
     id: "syntax-error",
     label: "Invalid JSON syntax",
-    valid: false,
     text: () => `{
   "name": "root",
   "type": "folder",
@@ -169,7 +167,6 @@ export const EXAMPLES: readonly Example[] = [
   {
     id: "invalid-fields",
     label: "Invalid fields",
-    valid: false,
     text: () =>
       json({
         name: "root",
@@ -191,7 +188,6 @@ export const EXAMPLES: readonly Example[] = [
   {
     id: "duplicates",
     label: "Duplicate names in a folder",
-    valid: false,
     text: () =>
       json({
         name: "root",
@@ -213,7 +209,6 @@ export const EXAMPLES: readonly Example[] = [
   {
     id: "nested-error",
     label: "Error deep in the tree",
-    valid: false,
     text: () =>
       json({
         name: "root",
@@ -236,13 +231,11 @@ export const EXAMPLES: readonly Example[] = [
   {
     id: "wrong-root",
     label: "Root is not an object",
-    valid: false,
     text: () => json([{ name: "a.txt", type: "file", size: 1 }]),
   },
   {
     id: "many-errors",
     label: "Too many errors (200)",
-    valid: false,
     text: () =>
       json({
         name: "root",

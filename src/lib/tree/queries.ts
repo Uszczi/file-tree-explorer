@@ -1,3 +1,4 @@
+import { isFolder } from "./nodes";
 import { joinPath, ROOT_PATH } from "./paths";
 import type { IndexedNode, NodePath, TreeIndex } from "./types";
 
@@ -14,14 +15,14 @@ export function ancestorPaths(index: TreeIndex, path: NodePath): NodePath[] {
 
 export function folderPaths(index: TreeIndex): NodePath[] {
   return [...index.byPath.values()]
-    .filter((entry) => entry.node.type === "folder")
+    .filter((entry) => isFolder(entry.node))
     .map((entry) => entry.path);
 }
 
 /** Index entries of a folder's direct children, in tree order. Empty for files. */
 export function childEntries(index: TreeIndex, path: NodePath): IndexedNode[] {
   const node = index.byPath.get(path)?.node;
-  if (node?.type !== "folder") return [];
+  if (node === undefined || !isFolder(node)) return [];
   return node.children.flatMap((child) => index.byPath.get(joinPath(path, child.name)) ?? []);
 }
 

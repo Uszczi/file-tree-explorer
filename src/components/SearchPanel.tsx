@@ -11,6 +11,7 @@ import { ROOT_PATH, SEARCH_PARAM } from "../lib/tree/paths";
 import { displayPath } from "../lib/tree/queries";
 import { searchNodes, type SearchResult } from "../lib/tree/search";
 import type { TreeIndex } from "../lib/tree/types";
+import { NodeIcon } from "./NodeIcon";
 import { NodeLink } from "./NodeLink";
 import { ui } from "./ui";
 
@@ -120,9 +121,7 @@ export function SearchPanel({ index }: SearchPanelProps) {
                     }`}
                   >
                     <span className="text-sm font-medium break-all">
-                      <span aria-hidden="true">
-                        {result.entry.node.type === "folder" ? "📁" : "📄"}
-                      </span>{" "}
+                      <NodeIcon node={result.entry.node} />{" "}
                       <HighlightedName result={result} />
                     </span>
                     <span className={`text-xs break-all ${ui.muted}`}>

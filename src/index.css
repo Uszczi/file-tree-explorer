@@ -2,7 +2,6 @@
 
 @layer base {
   :root {
-    /* Lets native controls (scrollbars, file picker) follow the system theme. */
     color-scheme: light dark;
   }
 

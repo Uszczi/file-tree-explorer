@@ -1,8 +1,10 @@
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { isFolder } from "../lib/tree/nodes";
 import { ROOT_PATH } from "../lib/tree/paths";
 import type { NodePath, TreeIndex } from "../lib/tree/types";
 import { ancestorPaths, folderPaths } from "../lib/tree/queries";
 import { getVisibleRows } from "../lib/tree/visibleRows";
+import { NodeIcon } from "./NodeIcon";
 import { NodeLink } from "./NodeLink";
 import { ui } from "./ui";
 
@@ -60,7 +62,7 @@ export function TreeView({ index, activePath }: TreeViewProps) {
     if (current === -1) return;
 
     const { entry, expanded: isExpanded } = rows[current];
-    const isFolder = entry.node.type === "folder";
+    const folder = isFolder(entry.node);
     const next = rows.at(current + 1);
 
     switch (event.key) {
@@ -71,11 +73,11 @@ export function TreeView({ index, activePath }: TreeViewProps) {
         if (current > 0) focusRow(rows[current - 1].entry.path);
         break;
       case "ArrowRight":
-        if (isFolder && !isExpanded) setFolderExpanded(entry.path, true);
+        if (folder && !isExpanded) setFolderExpanded(entry.path, true);
         else if (next?.entry.parentPath === entry.path) focusRow(next.entry.path);
         break;
       case "ArrowLeft":
-        if (isFolder && isExpanded) setFolderExpanded(entry.path, false);
+        if (folder && isExpanded) setFolderExpanded(entry.path, false);
         else if (entry.parentPath !== null) focusRow(entry.parentPath);
         break;
       case "Home":
@@ -114,7 +116,7 @@ export function TreeView({ index, activePath }: TreeViewProps) {
       >
         {rows.map(({ entry, expanded: isExpanded }) => {
           const { node, path, depth } = entry;
-          const isFolder = node.type === "folder";
+          const folder = isFolder(node);
           const isActive = path === activePath;
 
           return (
@@ -122,7 +124,7 @@ export function TreeView({ index, activePath }: TreeViewProps) {
               key={path}
               role="treeitem"
               aria-level={depth + 1}
-              aria-expanded={isFolder ? isExpanded : undefined}
+              aria-expanded={folder ? isExpanded : undefined}
               aria-selected={isActive}
               className={`flex items-center rounded-md pe-2 whitespace-nowrap ${
                 isActive
@@ -131,7 +133,7 @@ export function TreeView({ index, activePath }: TreeViewProps) {
               }`}
               style={{ paddingInlineStart: `${depth}rem` }}
             >
-              {isFolder ? (
+              {folder ? (
                 <button
                   type="button"
                   tabIndex={-1}
@@ -158,7 +160,7 @@ export function TreeView({ index, activePath }: TreeViewProps) {
                 title={node.name}
                 className={`max-w-96 truncate rounded-sm py-1 ${ui.focusRing}`}
               >
-                <span aria-hidden="true">{isFolder ? (isExpanded ? "📂" : "📁") : "📄"}</span> {node.name}
+                <NodeIcon node={node} expanded={isExpanded} /> {node.name}
               </NodeLink>
             </li>
           );
